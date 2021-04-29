@@ -12,13 +12,18 @@ objects:
   metadata:
     labels:
       service: bayesian-gremlin-${DYNAMODB_INSTANCE_PREFIX}${CHANNELIZER}${QUERY_ADMINISTRATION_REGION}
+      monitoring: enabled
     name: bayesian-gremlin-${DYNAMODB_INSTANCE_PREFIX}${CHANNELIZER}${QUERY_ADMINISTRATION_REGION}
   spec:
     ports:
-    - name: "${PORT}"
-      port: ${PORT}
+    - name: "8182"
+      port: 8182
       protocol: TCP
-      targetPort: ${PORT}
+      targetPort: 8182
+    - name: metrics
+      port: 5000
+      protocol: TCP
+      targetPort: 5000
     selector:
       service: bayesian-gremlin-${DYNAMODB_INSTANCE_PREFIX}${CHANNELIZER}${QUERY_ADMINISTRATION_REGION}
 - apiVersion: v1
@@ -79,7 +84,7 @@ objects:
           imagePullPolicy: Always
           name: bayesian-gremlin
           ports:
-          - containerPort: ${PORT}
+          - containerPort: 8182
             protocol: TCP
           resources:
             requests:
@@ -95,10 +100,10 @@ objects:
             failureThreshold: 3
             successThreshold: 1
             tcpSocket:
-              port: ${PORT}
+              port: 8182
           readinessProbe:
             tcpSocket:
-              port: ${PORT}
+              port: 8182
             failureThreshold: 3
             successThreshold: 1
             initialDelaySeconds: 60
@@ -190,3 +195,9 @@ parameters:
   required: false
   name: JAVA_OPTIONS
   value: ""
+
+- description: Gremlin pool size
+  displayName: Gremlin pool size
+  required: false
+  name: GREMLIN_POOL
+  value: "8"
